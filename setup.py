@@ -4,7 +4,7 @@ import re
 
 from setuptools import setup, find_packages
 
-from ckanext.sentry import __version__, __description__
+from ckanext.logstash import __version__, __description__
 
 RE_REQUIREMENT = re.compile(r'^\s*-r\s*(?P<filename>.*)$')
 
