@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
-import os
 import logging
 
 import logstash
@@ -42,16 +41,24 @@ class LogstashPlugin(plugins.SingletonPlugin):
         logstash_kind = logstash_kind or ''
         logstash_kind = logstash_kind.lower()
         if logstash_kind == 'tcp':
-            handler = logstash.TCPLogstashHandler(host, 5959, version=1))
+            handler = logstash.TCPLogstashHandler(
+                logstash_host, logstash_port, version=1
+            )
         elif logstash_kind == 'udp':
-            handler = logstash.LogstashHandler(host, 5959, version=1))
+            handler = logstash.LogstashHandler(
+                logstash_host, logstash_port, version=1
+            )
         elif logstash_kind == 'ampq':
-            handler = logstash.AMQPLogstashHandler(host=host,  version=1))
+            handler = logstash.AMQPLogstashHandler(
+                host=logstash_host,  version=1
+            )
         else:
-            log.warning('Unknown logstash kind specified (%s)', config.get('logstash.kind'))
+            log.warning('Unknown logstash kind specified (%s)',
+                        config.get('logstash.kind'))
             return
 
         handler.setLevel(logging.NOTSET)
+        handler.formatter.host = config.get('ckan.site_url')
 
         loggers = ['', 'ckan', 'ckanext', 'logstash.errors']
         logstash_log_level = config.get('logstash.log_level', logging.INFO)
