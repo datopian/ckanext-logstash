@@ -31,12 +31,16 @@ class LogstashPlugin(plugins.SingletonPlugin):
             self._configure_logging(config)
             return app
 
+    def make_error_log_middleware(self, app, config):
+        self._configure_logging(config)
+        return app
+
     def _configure_logging(self, config):
         '''
         Configure the Logstash log handler to the specified level
         '''
         logstash_host = config.get('logstash.host')
-        logstash_port = config.get('logstash.port') or 5959
+        logstash_port = int(config.get('logstash.port') or 5959)
         logstash_kind = config.get('logstash.kind')
         logstash_kind = logstash_kind or ''
         logstash_kind = logstash_kind.lower()
@@ -60,12 +64,13 @@ class LogstashPlugin(plugins.SingletonPlugin):
         handler.setLevel(logging.NOTSET)
         handler.formatter.host = config.get('ckan.site_url')
 
-        loggers = ['', 'ckan', 'ckanext', 'logstash.errors']
-        logstash_log_level = config.get('logstash.log_level', logging.INFO)
+        logging.info('Setting up Logstash logger')
+
+        loggers = ['', 'ckan', 'ckanext', 'logstash.errors', __name__]
+        logstash_log_level = config.get('logstash.log_level', logging.DEBUG)
         for name in loggers:
             logger = logging.getLogger(name)
             logger.addHandler(handler)
             logger.setLevel(logstash_log_level)
 
-        log.debug('Setting up Logstash logger with level {0}'.format(
-            logstash_log_level))
+        log.debug('Set-up Logstash logger with level %s', logstash_log_level)
